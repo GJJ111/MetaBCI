@@ -16,9 +16,12 @@ from pathlib import Path
 from mne.channels import make_standard_montage
 from mne import create_info
 from mne.io import RawArray
-from metabci.brainda.datasets.base import BaseTimeEncodingDataset
-from metabci.brainda.utils.channels import upper_ch_names
-from metabci.brainda.utils.download import mne_data_path
+from .base import BaseTimeEncodingDataset
+from ..utils.channels import upper_ch_names
+from ..utils.download import mne_data_path
+#from metabci.brainda.datasets.base import BaseTimeEncodingDataset
+#from metabci.brainda.utils.channels import upper_ch_names
+#from metabci.brainda.utils.download import mne_data_path
 import scipy.io as sci
 # The filepath will be available when the dataset is uploaded
 Cattan_P300_URL = "https://zenodo.org/record/2605205/files/"

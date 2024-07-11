@@ -4,76 +4,100 @@
 # Date: 2020/12/27
 # License: MIT License
 """
-Alex Motor imagery dataset.
+PeiYu  dataset.
 """
 from typing import Union, Optional, Dict, List, cast
 from pathlib import Path
 
-from mne.io import Raw
+from mne.io import Raw, read_raw_eeglab
 from mne.channels import make_standard_montage
 from .base import BaseDataset
 from ..utils.download import mne_data_path
 from ..utils.channels import upper_ch_names
 
-ALEX_URL = "https://zenodo.org/record/806023/files/"
-#C:\Users\Levovo\mne_data\MNE-alexeeg-data\record\806023\files
+CRED_URL = "https://xxxx/200Hz_rawdata/"
+# C:\Users\Levovo\mne_data\MNE-cred-data\200Hz_rawdata
+
+class CRED(BaseDataset):
 
 
-class AlexMI(BaseDataset):
-    """Alex Motor Imagery dataset.
-
-    Motor imagery dataset from the PhD dissertation of A. Barachant [1]_.
-
-    This Dataset contains EEG recordings from 8 subjects, performing 2 task of
-    motor imagination (right hand, feet or rest). Data have been recorded at
-    512Hz with 16 wet electrodes (Fpz, F7, F3, Fz, F4, F8, T7, C3, Cz, C4, T8,
-    P7, P3, Pz, P4, P8) with a g.tec g.USBamp EEG amplifier.
-
-    File are provided in MNE raw file format. A stimulation channel encoding
-    the timing of the motor imagination. The start of a trial is encoded as 1,
-    then the actual start of the motor imagination is encoded with 2 for
-    imagination of a right hand movement, 3 for imagination of both feet
-    movement and 4 with a rest trial.
-
-    The duration of each trial is 3 second. There is 20 trial of each class.
-
-    references
-    ----------
-    .. [1] Barachant, A., 2012. Commande robuste d'un effecteur par une
-           interface cerveau machine EEG asynchrone (Doctoral dissertation,
-           Université de Grenoble).
-           https://tel.archives-ouvertes.fr/tel-01196752
-
-    """
-
-    _EVENTS = {"right_hand": (2, (0, 3)), "feet": (3, (0, 3)), "rest": (4, (0, 3))}
+    _EVENTS = {"angry": (1, (0, 60)), "disgust": (2, (0, 60)), "fear": (3, (0, 60)), "neutral": (4, (0, 60)), "sad": (5, (0, 60))}
 
     _CHANNELS = [
+        "M1",
+        "M2",
+        "FP1",
         "FPZ",
+        "FP2",
+        "AF3",
+        "AF4",
         "F7",
+        "F5",
         "F3",
+        "F1",
         "FZ",
+        "F2",
         "F4",
+        "F6",
         "F8",
+        "FT7",
+        "FC5",
+        "FC3",
+        "FC1",
+        "FCZ",
+        "FC2",
+        "FC4",
+        "FC6",
+        "FT8",
         "T7",
+        "C5",
         "C3",
+        "C1",
+        "CZ",
+        "C2",
         "C4",
+        "C6",
         "T8",
+        "TP7",
+        "CP5",
+        "CP3",
+        "CP1",
+        "CPZ",
+        "CP2",
+        "CP4",
+        "CP6",
+        "TP8",
         "P7",
+        "P5",
         "P3",
+        "P1",
         "PZ",
+        "P2",
         "P4",
+        "P6",
         "P8",
+        "PO7",
+        "PO5",
+        "PO3",
+        "POZ",
+        "PO4",
+        "PO6",
+        "PO8",
+        "CB1",
+        "O1",
+        "OZ",
+        "O2",
+        "CB2"  
     ]
 
     def __init__(self):
         super().__init__(
-            dataset_code="alexeeg",
-            subjects=list(range(1, 9)),
+            dataset_code="CRED",
+            subjects=list(range(1, 25)),
             events=self._EVENTS,
             channels=self._CHANNELS,
-            srate=512,
-            paradigm="imagery",
+            srate=200,
+            paradigm="Emotion",#情绪识别数据集
         )
 
     def data_path(
@@ -89,7 +113,7 @@ class AlexMI(BaseDataset):
             raise (ValueError("Invalid subject id"))
 
         subject = cast(int, subject)
-        url = "{:s}subject{:d}.raw.fif".format(ALEX_URL, subject)
+        url = "{:s}{:02d}.set".format(CRED_URL, subject)
         dests = [
             [
                 mne_data_path(
@@ -108,21 +132,20 @@ class AlexMI(BaseDataset):
         self, subject: Union[str, int], verbose: Optional[Union[bool, str, int]] = None
     ) -> Dict[str, Dict[str, Raw]]:
         dests = self.data_path(subject)
-        montage = make_standard_montage("standard_1005")
-        montage.rename_channels(
-            {ch_name: ch_name.upper() for ch_name in montage.ch_names}
-        )
+        #montage = make_standard_montage("standard_1005")
+        #montage.rename_channels(
+        #    {ch_name: ch_name.upper() for ch_name in montage.ch_names}
+        #)
         # montage.ch_names = [ch_name.upper() for ch_name in montage.ch_names]
 
         sess = dict()
         for isess, run_dests in enumerate(dests):
             runs = dict()
-            for irun, run_file in enumerate(run_dests):
-                raw = Raw(run_file, preload=True)
+            for irun, run_array in enumerate(run_dests):
+                raw = read_raw_eeglab(run_array, preload=True)
                 raw = upper_ch_names(raw)
-                raw.set_montage(montage)
+                #raw.set_montage(montage)
                 runs["run_{:d}".format(irun)] = raw
             sess["session_{:d}".format(isess)] = runs
 
         return sess
-

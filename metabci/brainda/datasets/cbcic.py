@@ -4,7 +4,9 @@ China BCI Competition.
 """
 import mne
 
-from metabci.brainda.utils.download import mne_data_path
+from ..utils.download import mne_data_path
+
+#from metabci.brainda.utils.download import mne_data_path
 from typing import Union, Optional, Dict, List, cast
 from pathlib import Path
 

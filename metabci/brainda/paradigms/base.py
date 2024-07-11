@@ -222,9 +222,12 @@ class BaseParadigm(metaclass=ABCMeta):
                         )
                     else:
                         # convert event_id to its number type instead of default auto-renaming in 0.19.2
-                        events, _ = mne.events_from_annotations(
-                            raw, event_id=(lambda x: int(x))
-                        )
+                        
+                        # events, _ = mne.events_from_annotations(
+                        #     raw, event_id=(lambda x: int(x))
+                        # )
+                        
+                        events, event_dict = mne.events_from_annotations(raw)
 
                     for event_name in used_events.keys():
                         # mne.pick_events returns any matching events in include

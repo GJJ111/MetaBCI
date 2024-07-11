@@ -17,8 +17,10 @@ from pathlib import Path
 import mne.channels
 from mne.io import read_raw_cnt
 from mne.channels import make_standard_montage
-from metabci.brainda.datasets.base import BaseTimeEncodingDataset
-from metabci.brainda.utils.channels import upper_ch_names
+from .base import BaseTimeEncodingDataset
+from ..utils.channels import upper_ch_names
+#from metabci.brainda.datasets.base import BaseTimeEncodingDataset
+#from metabci.brainda.utils.channels import upper_ch_names
 
 # The filepath will be available when the dataset is uploaded
 filepath = ""

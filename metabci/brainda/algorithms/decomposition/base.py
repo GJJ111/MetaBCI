@@ -12,7 +12,8 @@ from numpy import ndarray
 from scipy.linalg import solve
 from scipy.signal import sosfiltfilt, cheby1, cheb1ord
 from sklearn.base import BaseEstimator, TransformerMixin, clone
-from metabci.brainda.datasets.base import BaseTimeEncodingDataset
+from ...datasets.base import BaseTimeEncodingDataset
+#from metabci.brainda.datasets.base import BaseTimeEncodingDataset
 import mne
 
 

@@ -143,25 +143,46 @@ def mne_data_path(
     str
         local path of the target file
     """
-    sign = sign.upper()
-    key = "MNE_DATASETS_{:s}_PATH".format(sign)
-    key_dest = "MNE-{:s}-data".format(sign.lower())
-    path = _get_path(path, key, sign)
-    path = str(path)
-    destination = _url_to_local_path(url, os.path.join(path, key_dest))
-    # Fetch the file
-    # forget hash check
-    known_hash = None
-    if not os.path.exists(destination) or force_update:
-        if not os.path.isdir(os.path.dirname(destination)):
-            os.makedirs(os.path.dirname(destination))
-        if os.path.isfile(destination):
-            os.remove(destination)
-    #     known_hash = None
-    # else:
-    #     known_hash = file_hash(destination)
+    
+    if sign != 'CRED':
+        sign = sign.upper()
+        key = "MNE_DATASETS_{:s}_PATH".format(sign)
+        key_dest = "MNE-{:s}-data".format(sign.lower())
+        path = _get_path(path, key, sign)
+        path = str(path)
+        destination = _url_to_local_path(url, os.path.join(path, key_dest))
+        # Fetch the file
+        # forget hash check
+        known_hash = None
+        if not os.path.exists(destination) or force_update:
+            if not os.path.isdir(os.path.dirname(destination)):
+                os.makedirs(os.path.dirname(destination))
+            if os.path.isfile(destination):
+                os.remove(destination)
+        #     known_hash = None
+        # else:
+        #     known_hash = file_hash(destination)
+        
+        _fetch_file(url, destination, proxies=proxies, known_hash=known_hash, **kwargs)
 
-    _fetch_file(url, destination, proxies=proxies, known_hash=known_hash, **kwargs)
-
-    _do_path_update(path, update_path, key, sign)
+        _do_path_update(path, update_path, key, sign)
+    elif sign == 'CRED':
+        sign = sign.upper()
+        key = "MNE_DATASETS_{:s}_PATH".format(sign)
+        key_dest = "MNE-{:s}-data".format(sign.lower())
+        path = _get_path(path, key, sign)
+        path = str(path)
+        destination = _url_to_local_path(url, os.path.join(path, key_dest))
+        # Fetch the file
+        # forget hash check
+        known_hash = None
+        if not os.path.exists(destination) or force_update:
+            # if not os.path.isdir(os.path.dirname(destination)):
+            #     os.makedirs(os.path.dirname(destination))
+            # if os.path.isfile(destination):
+            #     os.remove(destination)
+            print(r"请从https://pan.baidu.com/s/19472zbXmBA5sP6Hjp-lBUg?pwd=jimd下载数据集放至C:\Users\Levovo\mne_data\MNE-cred-data\200Hz_rawdata目录下")
+        else:
+            print(r"数据存在")
+                
     return destination
