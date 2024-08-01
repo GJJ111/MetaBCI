@@ -1,7 +1,9 @@
 import numpy as np
+from sklearn.cluster import KMeans
 import mne
 import matplotlib.pyplot as plt
-
+import mne 
+from mne.io import read_raw_eeglab 
 
 class TimeAnalysis:
     Chan_Neuroscan = [
@@ -152,18 +154,74 @@ class TimeAnalysis:
             channel(list): selected channels, by default [0]
         """
         sub_meta = meta[meta["event"] == event]
-        event_id = sub_meta.index.to_numpy()
-        self.data_length = np.round(data.shape[2] / dataset.srate)
+        
+        if event == 'all_event':
+            
+            self.data = data
+            self.latency = latency
+            self.fs = dataset.srate
+            self.All_channel = dataset.channels
+            self.event = event
+        
+        else:
+        
+            event_id = sub_meta.index.to_numpy()
+            self.data_length = np.round(data.shape[2] / dataset.srate)
 
-        if isinstance(channel[0], str):
-            self.chan_ID = self.get_chan_id(channel, dataset.channels)
-        elif isinstance(channel[0], int):
-            self.chan_ID = channel
-        self.data = data[event_id, :, :]
-        self.latency = latency
-        self.fs = dataset.srate
-        self.All_channel = dataset.channels
-        self.event = event
+            if isinstance(channel[0], str):
+                self.chan_ID = self.get_chan_id(channel, dataset.channels)
+            elif isinstance(channel[0], int):
+                self.chan_ID = channel
+            self.data = data[event_id, :, :]
+            self.latency = latency
+            self.fs = dataset.srate
+            self.All_channel = dataset.channels
+            self.event = event
+
+    def microstates(self, data=[], n_microstates=8, min_duration=5):
+        """
+        提取脑电微状态
+        
+        参数:
+        eeg_data (ndarray): 三维脑电数据数组,形状为 (n_trials, n_channels, n_times)
+        n_microstates (int): 要提取的微状态数量
+        min_duration (int): 微状态最小持续时间(采样点数)
+        
+        返回:
+        microstates (ndarray): 形状为 (n_trials, n_times) 的微状态序列
+        microstate_maps (ndarray): 形状为 (n_microstates, n_channels) 的微状态地图
+        """
+        data=self.data
+        eeg_data=data
+        n_trials, n_channels, n_times = eeg_data.shape
+        
+        # 将每个时间点的脑电数据展平为向量
+        flattened_data = eeg_data.transpose(0, 2, 1).reshape(n_trials * n_times, n_channels)
+        
+        # 使用 K-Means 聚类提取微状态地图
+        kmeans = KMeans(n_clusters=n_microstates, n_init=10, random_state=42)
+        kmeans.fit(flattened_data)
+        microstate_maps = kmeans.cluster_centers_
+        
+        # 为每个时间点分配微状态标签
+        microstates = kmeans.predict(flattened_data).reshape(n_trials, n_times)
+        
+        # 过滤掉持续时间小于最小持续时间的微状态
+        for trial in range(n_trials):
+            current_state = microstates[trial, 0]
+            state_duration = 1
+            for t in range(1, n_times):
+                if microstates[trial, t] == current_state:
+                    state_duration += 1
+                else:
+                    if state_duration < min_duration:
+                        microstates[trial, t-state_duration:t] = current_state
+                    current_state = microstates[trial, t]
+                    state_duration = 1
+            if state_duration < min_duration:
+                microstates[trial, -state_duration:] = current_state
+        
+        return microstates, microstate_maps
 
     def stacking_average(self, data=[], _axis=[0]):  # data：trials*channels*time
         """
@@ -180,8 +238,9 @@ class TimeAnalysis:
         if isinstance(_axis, int):
             _axis = [_axis]
         axis = tuple(_axis)
-        if data == []:
-            data = self.data
+        # if data == []:
+        #     data = self.data
+        data = self.data
         data_mean = data.mean(axis=axis)
         return data_mean
 

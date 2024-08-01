@@ -29,16 +29,26 @@ class FrequencyAnalysis:
                  The wanted channel.if 'all',all channel will be extracted.default value = 'all'
 
         """
-
-        sub_meta = meta[meta["event"] == event]
-        event_id = sub_meta.index.to_numpy()
-        self.data_length = np.round(data.shape[2] / srate)
-        if channel == "all":
-            self.data = data[event_id, :, :]
-        else:
-            self.data = data[event_id, channel, :]
-        self.latency = latency
-        self.fs = srate
+        if event == 'all_event':
+            
+            self.data_length = np.round(data.shape[2] / srate)
+            if channel == "all":
+                self.data = data
+            else:
+                self.data = data[:, channel, :]
+            self.latency = latency
+            self.fs = srate
+            
+        else:    
+            sub_meta = meta[meta["event"] == event]
+            event_id = sub_meta.index.to_numpy()
+            self.data_length = np.round(data.shape[2] / srate)
+            if channel == "all":
+                self.data = data[event_id, :, :]
+            else:
+                self.data = data[event_id, channel, :]
+            self.latency = latency
+            self.fs = srate
 
     def stacking_average(self, data=[], _axis=0):
         """
@@ -91,6 +101,39 @@ class FrequencyAnalysis:
         plt.ylabel("PSD [V**2]")
         plt.show()
         return f, Pxx_den
+    
+    def power_spectrum_density(self, x,nfft=None,axis=-1):
+        """
+        -author: Zhou hongzhan & He Jiatong
+        -Create on:2022-8-9
+        -update log:
+            2022-8-31 by Zhou hongzhan
+
+        Args:
+            x : np.array
+               1D data.
+
+        Returns:
+            f : np.array
+               An array of frequencies
+            Pxx_den : np.array
+               The amplitude array respectively correspond to frequency array
+
+        """
+        nfft=nfft
+        axis=axis
+        f, Pxx_den = signal.periodogram(x, self.fs, window="boxcar", nfft=nfft,scaling="density",return_onesided=False,axis=axis)
+        #f, Pxx_den = signal.welch(x, self.fs, nperseg=12000, scaling='density')
+        # plt.semilogy(f, Pxx_den)
+        # plt.title("Power Spectral Density")
+        # plt.xlim([0, 60])
+        # plt.ylim([0, 0.5])
+        # plt.xlabel("frequency [Hz]")
+        # plt.ylabel("PSD [V**2/Hz]")
+        # plt.show()
+        return f, Pxx_den   
+    
+    
 
     def sum_y(self, x, y, x_inf, x_sup):
         """

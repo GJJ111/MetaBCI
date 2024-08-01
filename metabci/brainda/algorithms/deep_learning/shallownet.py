@@ -175,22 +175,23 @@ class ShallowNet(nn.Module):
 
     @torch.no_grad()
     def _reset_parameters(self):
-        nn.init.xavier_uniform_(self.step1.time_conv.weight, gain=1)
-        nn.init.constant_(self.step1.time_conv.bias, 0)
-        nn.init.xavier_uniform_(self.step2.space_conv.weight, gain=1)
-        nn.init.constant_(self.step2.bn.weight, 1)
-        nn.init.constant_(self.step2.bn.bias, 0)
-        nn.init.xavier_uniform_(self.fc_layer.weight, gain=1)
-        nn.init.constant_(self.fc_layer.bias, 0)
+        # nn.init.xavier_uniform_(self.step1.time_conv.weight, gain=1)
+        # nn.init.constant_(self.step1.time_conv.bias, 0)
+        # nn.init.xavier_uniform_(self.step2.space_conv.weight, gain=1)
+        # nn.init.constant_(self.step2.bn.weight, 1)
+        # nn.init.constant_(self.step2.bn.bias, 0)
+        # nn.init.xavier_uniform_(self.fc_layer.weight, gain=1)
+        # nn.init.constant_(self.fc_layer.bias, 0)
+        pass
 
     def forward(self, X: Tensor, **kwargs):
         X = X.unsqueeze(1)
         out = self.model(X)
         return out
 
-    def cal_backbone(self, X: Tensor, **kwargs):
-        X = X.unsqueeze(1)
-        tmp = X
-        for i in range(len(self.model) - 1):
-            tmp = self.model[i](tmp)
-        return tmp
+    # def cal_backbone(self, X: Tensor, **kwargs):
+    #     X = X.unsqueeze(1)
+    #     tmp = X
+    #     for i in range(len(self.model) - 1):
+    #         tmp = self.model[i](tmp)
+    #     return tmp
